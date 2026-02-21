@@ -8,6 +8,9 @@ from services.cleanup import start_cleanup_scheduler
 
 app = FastAPI(title="Reel-Studio API")
 
+# Get port from environment (Railway/Render)
+PORT = int(os.getenv("PORT", 8000))
+
 # CORS
 app.add_middleware(
     CORSMiddleware,

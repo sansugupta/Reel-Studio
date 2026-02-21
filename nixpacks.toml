@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["python311", "ffmpeg", "nodejs_18"]
+
+[phases.install]
+cmds = [
+  "cd backend && python3.11 -m venv venv311",
+  "cd backend && . venv311/bin/activate && pip install -r requirements.txt",
+  "cd frontend && npm install",
+  "cd frontend && npm run build"
+]
+
+[phases.build]
+cmds = ["echo 'Build complete'"]
+
+[start]
+cmd = "cd backend && . venv311/bin/activate && uvicorn main:app --host 0.0.0.0 --port $PORT"
