@@ -20,40 +20,39 @@
    - Region: Oregon (US West)
    - Branch: `main`
    - Root Directory: `backend`
-   - Runtime: `Python 3`
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Environment: `Docker`
+   - Dockerfile Path: `backend/Dockerfile`
    - Instance Type: `Free`
 
 4. Add Environment Variables:
    ```
-   ADMIN_TOKEN=your-secret-token
+   ADMIN_TOKEN=your-secret-token-here
    MAX_FILE_SIZE=209715200
    CLEANUP_INTERVAL_MINUTES=5
    FILE_MAX_AGE_MINUTES=30
-   PYTHON_VERSION=3.11.0
    ```
 
 5. Click "Create Web Service"
 
 ## Step 3: Deploy Frontend
 
-1. Click "New +" → "Static Site"
+1. Click "New +" → "Web Service"
 2. Connect same repo: `sansugupta/Reel-Studio`
 3. Configure:
    - Name: `reel-studio-frontend`
    - Branch: `main`
    - Root Directory: `frontend`
-   - Build Command: `npm install && npm run build`
-   - Publish Directory: `.next`
+   - Environment: `Docker`
+   - Dockerfile Path: `frontend/Dockerfile`
+   - Instance Type: `Free`
 
 4. Add Environment Variable:
    ```
    NEXT_PUBLIC_API_URL=https://reel-studio-backend.onrender.com
    ```
-   (Use your backend URL from step 2)
+   (Replace with your actual backend URL from step 2)
 
-5. Click "Create Static Site"
+5. Click "Create Web Service"
 
 ## Step 4: Access Your App
 
@@ -93,6 +92,22 @@ git push origin main
 
 ### Manual Deploy
 Render dashboard → Your service → "Manual Deploy"
+
+## Troubleshooting
+
+### Build Failed?
+- Check Logs in Render dashboard
+- Make sure Dockerfile path is correct: `backend/Dockerfile` or `frontend/Dockerfile`
+- Verify Root Directory is set: `backend` or `frontend`
+
+### Frontend can't connect to backend?
+- Update `NEXT_PUBLIC_API_URL` in frontend environment variables
+- Use the full backend URL: `https://reel-studio-backend.onrender.com`
+
+### Out of memory?
+- Free tier has 512MB RAM
+- Can only handle 1-2 concurrent video processing
+- Consider upgrading or using Railway/Oracle Cloud
 
 ## Cost
 **$0/month forever!** (with limitations above)
