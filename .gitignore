@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+venv311/
 ENV/
 *.egg-info/
 
@@ -24,6 +25,7 @@ dist/
 # Temporary files
 temp_uploads/
 temp_outputs/
+analytics.json
 
 # IDE
 .vscode/
