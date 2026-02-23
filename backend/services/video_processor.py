@@ -18,7 +18,7 @@ def process_video(session_id: str, video_path: str):
         full_audio_path = f"{output_dir}/full_audio.mp3"
         subprocess.run([
             ffmpeg_cmd, "-i", video_path,
-            "-vn", "-acodec", "libmp3lame", "-b:a", "320k",
+            "-vn", "-acodec", "libmp3lame", "-b:a", "192k",  # Reduced bitrate for speed
             full_audio_path, "-y"
         ], check=True, capture_output=True, text=True)
         
@@ -30,26 +30,28 @@ def process_video(session_id: str, video_path: str):
             video_no_audio_path, "-y"
         ], check=True, capture_output=True, text=True)
         
-        # 3. Use Demucs for vocal separation
+        # 3. Use Demucs for vocal separation (optimized)
         try:
             # Check if demucs is available
             demucs_cmd = shutil.which("demucs")
             if not demucs_cmd:
                 raise Exception("Demucs not found")
             
-            # Run Demucs with 2 stems (vocals and no_vocals)
+            # Run Demucs with faster settings
             subprocess.run([
                 demucs_cmd,
                 "--two-stems=vocals",
                 "-o", output_dir,
                 "--mp3",
-                "--mp3-bitrate", "320",
+                "--mp3-bitrate", "192",  # Reduced bitrate
+                "-n", "htdemucs_ft",  # Faster model
+                "--jobs", "1",  # Single job to avoid memory issues
                 full_audio_path
-            ], check=True, capture_output=True, text=True)
+            ], check=True, capture_output=True, text=True, timeout=120)  # 2 min timeout
             
-            # Demucs creates: output_dir/htdemucs/full_audio/vocals.mp3 and no_vocals.mp3
+            # Demucs creates: output_dir/htdemucs_ft/full_audio/vocals.mp3 and no_vocals.mp3
             audio_name = Path(full_audio_path).stem
-            demucs_output = Path(output_dir) / "htdemucs" / audio_name
+            demucs_output = Path(output_dir) / "htdemucs_ft" / audio_name
             
             # Move the separated files
             vocals_src = demucs_output / "vocals.mp3"
@@ -71,10 +73,15 @@ def process_video(session_id: str, video_path: str):
                 shutil.copy(full_audio_path, music_dest)
             
             # Clean up Demucs output directory
-            htdemucs_dir = Path(output_dir) / "htdemucs"
+            htdemucs_dir = Path(output_dir) / "htdemucs_ft"
             if htdemucs_dir.exists():
                 shutil.rmtree(htdemucs_dir)
                 
+        except subprocess.TimeoutExpired:
+            print(f"Demucs timeout for {session_id}, using fallback")
+            # Fallback: create copies of full audio
+            shutil.copy(full_audio_path, f"{output_dir}/vocals_only.mp3")
+            shutil.copy(full_audio_path, f"{output_dir}/music_only.mp3")
         except Exception as demucs_error:
             print(f"Demucs error: {demucs_error}, using fallback")
             # Fallback: create copies of full audio
