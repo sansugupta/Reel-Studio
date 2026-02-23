@@ -4,6 +4,7 @@ interface OutputCardProps {
   icon: 'video' | 'audio' | 'music' | 'microphone'
   downloadUrl: string
   filename: string
+  fileType: 'video' | 'audio'
 }
 
 const icons = {
@@ -21,31 +22,24 @@ const icons = {
   )
 }
 
-export default function OutputCard({ title, description, icon, downloadUrl, filename }: OutputCardProps) {
-  const handleDownload = async (url: string, name: string) => {
-    try {
-      const response = await fetch(url)
-      const blob = await response.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-      
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = name
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
-      window.URL.revokeObjectURL(blobUrl)
-    } catch (error) {
-      console.error('Download failed:', error)
-      alert('Download failed. Please try again.')
-    }
+export default function OutputCard({ title, description, icon, downloadUrl, filename, fileType }: OutputCardProps) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const fullUrl = `${API_URL}${downloadUrl}`
+
+  const handleDownload = () => {
+    const link = document.createElement('a')
+    link.href = fullUrl
+    link.download = filename
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-6 group">
-      <div className="flex items-start space-x-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow p-6">
+      <div className="flex items-start space-x-4 mb-4">
+        <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center flex-shrink-0">
           <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {icons[icon]}
           </svg>
@@ -55,21 +49,41 @@ export default function OutputCard({ title, description, icon, downloadUrl, file
           <h3 className="text-lg font-semibold text-gray-800 mb-1">
             {title}
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-gray-600">
             {description}
           </p>
-          
-          <button
-            onClick={() => handleDownload(downloadUrl, filename)}
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium hover:shadow-lg transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span>Download</span>
-          </button>
         </div>
       </div>
+
+      {/* Player */}
+      <div className="mb-4">
+        {fileType === 'video' ? (
+          <video 
+            controls 
+            className="w-full rounded-lg bg-black"
+            style={{ maxHeight: '200px' }}
+          >
+            <source src={fullUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <audio 
+            controls 
+            className="w-full"
+          >
+            <source src={fullUrl} type="audio/mpeg" />
+          </audio>
+        )}
+      </div>
+      
+      <button
+        onClick={handleDownload}
+        className="w-full inline-flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium hover:shadow-lg transition-all"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <span>Download</span>
+      </button>
     </div>
   )
 }

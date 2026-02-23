@@ -93,32 +93,36 @@ export default function OutputSection({
             title="Video (No Audio)"
             description="Silent version of your uploaded video"
             icon="video"
-            downloadUrl={`${API_URL}${outputs.video_no_audio}`}
+            downloadUrl={outputs.video_no_audio}
             filename="video_no_audio.mp4"
+            fileType="video"
           />
           
           <OutputCard
             title="Full Audio"
             description="Complete original audio from the video"
             icon="audio"
-            downloadUrl={`${API_URL}${outputs.full_audio}`}
+            downloadUrl={outputs.full_audio}
             filename="full_audio.mp3"
+            fileType="audio"
           />
           
           <OutputCard
             title="Music Only"
             description="Audio without vocals"
             icon="music"
-            downloadUrl={`${API_URL}${outputs.music_only}`}
+            downloadUrl={outputs.music_only}
             filename="music_only.mp3"
+            fileType="audio"
           />
           
           <OutputCard
             title="Vocals Only"
             description="Extracted voice track"
             icon="microphone"
-            downloadUrl={`${API_URL}${outputs.vocals_only}`}
+            downloadUrl={outputs.vocals_only}
             filename="vocals_only.mp3"
+            fileType="audio"
           />
         </div>
 
